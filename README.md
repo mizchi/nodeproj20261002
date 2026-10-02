@@ -1,8 +1,14 @@
 # nodeproj20261002
 
-**StrykerJS のミューテーションテストを試すための TypeScript テストプロジェクトです。** Vite Plus 1.0.0 で初期化し、StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。
+日本語 | [English](README.en.md)
+
+**StrykerJS のミューテーションテストを試すための TypeScript テンプレートプロジェクトです。** Vite Plus 1.0.0 で初期化し、StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。
 
 [cargo-mutants / proptest / Kani の記事](https://zenn.dev/mizchi/articles/rust-mutants-proptest-kani)と同じリングバッファの題材を追加しました。
+
+## テンプレートとして使う
+
+GitHub の [Use this template](https://github.com/mizchi/nodeproj20261002/generate) から新しいリポジトリを作成できます。作成後、`package.json` の `name` と README のプロジェクト名を変更して利用してください。
 
 ## 解説
 
@@ -106,3 +112,7 @@ Vitest 5 では `testNamePattern` に使うテストのフルネームが空白�
 `patches/@stryker-mutator__vitest-runner@10.0.0.patch` で、runner とカバレッジ収集側の名前の組み立てを `>` 区切りに揃えています。`pnpm-workspace.yaml` の `patchedDependencies` に登録しており、`just install` 時にも適用されます。このパッチは Vitest 5 用です。runner を更新するときはパッチの要否を確認し、`just mutate-demo` が 85.71%、`just mutate` が 100% になることを検証してください。
 
 公式ドキュメント: [Vite Plus のプロジェクト作成](https://viteplus.dev/guide/create)、[StrykerJS](https://github.com/stryker-mutator/stryker-js)、[Vitest runner](https://stryker-mutator.io/docs/stryker-js/vitest-runner/)、[Vitest 5 のテスト名変更](https://vitest.dev/guide/migration/#testnamepattern-matches-the-joined-full-name)。
+
+## ライセンス
+
+[MIT](LICENSE)。Copyright (c) 2026 mizchi.
