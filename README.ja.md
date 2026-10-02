@@ -1,6 +1,6 @@
 # nodeproj20261002
 
-日本語 | [English](README.en.md)
+[English](README.md) | 日本語
 
 **StrykerJS のミューテーションテストを試すための TypeScript テンプレートプロジェクトです。** Vite Plus 1.0.0 で初期化し、StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。
 

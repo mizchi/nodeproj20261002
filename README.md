@@ -1,6 +1,6 @@
 # nodeproj20261002
 
-[日本語](README.md) | English
+English | [日本語](README.ja.md)
 
 **A TypeScript template project for experimenting with StrykerJS mutation testing.** Initialized with Vite Plus 1.0.0, it uses StrykerJS 10.0.0 and fast-check 4.10.2 to find gaps in tests, and Uneffect 0.5.1 + Z3 to check contracts and effects.
 
