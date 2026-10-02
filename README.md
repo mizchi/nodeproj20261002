@@ -1,14 +1,35 @@
 # nodeproj20261002
 
-Vite Plus 1.0.0 で初期化した TypeScript ライブラリ。StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。LemmaScript 0.6.4 + Dafny 4.11.0 による状態遷移の証明も比較用に残しています。
+**StrykerJS のミューテーションテストを試すための TypeScript テストプロジェクトです。** Vite Plus 1.0.0 で初期化し、StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。
 
 [cargo-mutants / proptest / Kani の記事](https://zenn.dev/mizchi/articles/rust-mutants-proptest-kani)と同じリングバッファの題材を追加しました。
+
+## 解説
+
+- [Stryker と fast-check の実験](docs/fast-check-stryker.md): 参照モデル、生成範囲、生き残る変異、反例の shrink・再現、限定全探索の手順と結果。
+- [Git の差分だけを検査する](docs/mutation-diff.md): 変更行の選択、ブランチ比較、検査範囲を広げる条件、差分用レポート。
+- [Uneffect による契約と副作用の検査](docs/uneffect.md): 検査対象、Z3 の反例、`verified` / `assumed` の違いと保証範囲。
+
+## 検証レポート
+
+`reports/` のファイルは各コマンドで生成されます。実行後にローカルで開いてください。
+
+| 確認したい結果                         | レポート                                                                                                                                                                           | 生成するコマンド       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| 全テストで検出した変異                 | [ミューテーション一覧](reports/mutation/mutation.html)                                                                                                                             | `just mutate`          |
+| Git の差分で検出した変異               | [差分の結果](reports/mutation/changed.html)、[対象と判断理由](reports/mutation/changed-plan.json)                                                                                  | `just mutate-changed`  |
+| 境界値テストを省いたときに生き残る変異 | [送料のデモ](reports/mutation/demo.html)                                                                                                                                           | `just mutate-demo`     |
+| 通常テストと PBT の比較                | [通常テスト](reports/mutation/ring-unit.html)、[長さ 0 なしの PBT](reports/mutation/ring-positive.html)、[長さ 0 を含む PBT](reports/mutation/ring-property.html)                  | `just mutate-ring`     |
+| Uneffect の契約・副作用・反例          | [契約](reports/uneffect/contracts.json)、[副作用](reports/uneffect/effects.json)、[read の反例](reports/uneffect/read-zero.json)、[write の反例](reports/uneffect/write-zero.json) | `just formal-uneffect` |
+
+Stryker の HTML レポートでは、変異ごとの変更された式と、どのテストが検出したかを確認できます。同じ名前の JSON レポートも生成します。レポートと Stryker の作業ディレクトリは Git の管理対象から除外しています。
+
+## 実験を再現する
 
 ```sh
 just install
 just formal-uneffect # 契約・副作用の検査と既知のバグの反例・実行時再現
-just setup-proof # Dafny を .tools 内に準備（初回のみ、unzip が必要）
-just experiment  # ミューテーション比較・shrink・限定全探索・形式証明
+just experiment  # ミューテーション比較・shrink・限定全探索・契約検査
 ```
 
 通常テストだけで **64/97**、長さ 0 を除いた PBT で **93/97**、長さ 0 を含む PBT で **97/97** の変異を検出しました。[実験の手順と結果](docs/fast-check-stryker.md)に生成範囲、反例、各レポートを記載しています。
@@ -18,14 +39,7 @@ just check-uneffect          # verified で契約を検査、declared で副作�
 just counterexample-uneffect # read/write の 0 件ガードを外した反例を得て再現
 ```
 
-契約は **63 obligations が verified、仮定 0 件**。副作用の検査は **assumed、組み込み契約の仮定 11 件**です。JSON の検証結果を `reports/uneffect/` に保存します。[検査対象・プロファイル・保証範囲](docs/uneffect.md)を参照してください。Uneffect 単独の検査には Dafny や Java は不要です。
-
-```sh
-just prove         # 任意の合法なカーソル・件数について契約を証明
-just proof-failure # 0 件ガードを外した read/write のバグを両方検出
-```
-
-実装から呼び出す `src/ring-cursor.ts` の純粋関数を直接変換し、**18 verified, 0 errors**。インデックスの範囲、長さの増減、満杯の判定、0 件操作の保持を証明します。バイト列のコピーや JavaScript の浮動小数点全般は証明対象に含みません。[Kani との違いと証明範囲](docs/lemmascript.md)を参照してください。
+契約は **63 obligations が verified、仮定 0 件**。副作用の検査は **assumed、組み込み契約の仮定 11 件**です。JSON の検証結果を `reports/uneffect/` に保存します。[検査対象・プロファイル・保証範囲](docs/uneffect.md)を参照してください。
 
 ## 開発
 
@@ -36,10 +50,20 @@ just install  # lockfile に従って依存をインストール
 just test     # Vitest で単体テスト
 just check    # フォーマット・lint・型チェック
 just build    # vp pack でライブラリと型宣言をビルド
-just verify   # check・test・build・ミューテーションテスト・形式証明
+just verify   # check・test・build・ミューテーションテスト・契約と副作用の検査
 ```
 
 `just watch` でテストを監視、`just fmt` でフォーマットを適用します。just がなくても `pnpm test`、`pnpm check`、`pnpm build` で実行できます。
+
+変更したソースだけを素早く検査する場合は次を使います。テスト・設定・依存の変更がある場合は全ソースを検査します。[対象の選び方と保証範囲](docs/mutation-diff.md)を参照してください。
+
+```sh
+just mutate-changed                   # HEAD に対する未コミット差分
+just mutate-changed --base origin/main # ブランチの分岐点からの差分
+just mutate-changed --list             # 対象の表示のみ
+```
+
+GitHub Actions の [Mutation diff](.github/workflows/mutation-diff.yml) は PR のソース差分を `--diff-only` で検査します。ソース差分がなければスキップし、対象一覧と HTML / JSON レポートを artifact に保存します。CI ではテスト・設定・依存の変更から全ソース検査へ広げません。[CI の動作と手動実行](docs/mutation-diff.md#github-actions)を参照してください。
 
 ## ミューテーションテストを試す
 
@@ -63,20 +87,13 @@ just mutate
 
 `tests/shipping.boundary.test.ts` がこの変異を検出し、送料の 7 個すべてが `Killed` になります。リングバッファの 97 個と合わせたスコアは **100%** です。
 
-| 実行               | HTML レポート                    | JSON レポート                    |
-| ------------------ | -------------------------------- | -------------------------------- |
-| `just mutate-demo` | `reports/mutation/demo.html`     | `reports/mutation/demo.json`     |
-| `just mutate`      | `reports/mutation/mutation.html` | `reports/mutation/mutation.json` |
-
-HTML レポートをブラウザで開くと、変更された式と検出結果を確認できます。レポートと Stryker の作業ディレクトリは Git の管理対象から除外しています。
-
 ## 構成と互換性
 
 - `vite.config.ts`: ビルド・単体テスト・lint・フォーマットの設定。
 - `stryker.config.json`: `src/**/*.ts` を変異させ、`@stryker-mutator/vitest-runner` で検証。変異ごとに、それをカバーするテストを実行します。
 - `stryker.demo.config.mjs`: 送料の通常ケースだけを実行する比較用設定。標準設定を読み込み、変異対象・テスト対象・レポートの出力先を変更します。
 - `stryker.ring.config.mjs`: リングバッファだけを変異させ、通常テスト・長さ 0 なしの PBT・長さ 0 を含む PBT を比較します。
-- `LemmaScript-files.txt`: 証明対象の TypeScript。生成物は `proofs/` に置き、`just prove` が生成との差分と証明を検証します。
+- `verification/ring-contracts.ts`: 実装と同じスカラー関数を呼び、read/write の長さの増減と 0 件操作の保持を Uneffect で検査します。
 
 TypeScript は **6.0.3 に固定**しています。雛形の TypeScript 7.0.2 では、Stryker が使う `parseConfigFileTextToJson` API がなく、実行が失敗しました。型宣言も `tsc` で生成します。
 

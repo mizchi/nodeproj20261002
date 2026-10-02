@@ -7,7 +7,7 @@ just install
 just formal-uneffect
 ```
 
-個別には `just check-uneffect` と `just counterexample-uneffect`。pnpm では `pnpm check:uneffect`、`pnpm demo:uneffect-failure` です。Uneffect の検査は Node.js 24 とパッケージ内の Z3 対応で動作し、Dafny / Java / Quint は使いません。
+個別には `just check-uneffect` と `just counterexample-uneffect`。pnpm では `pnpm check:uneffect`、`pnpm demo:uneffect-failure` です。Uneffect の検査は Node.js 24 とパッケージ内の Z3 対応で動作します。
 
 ## 検査対象と結果
 
@@ -72,6 +72,6 @@ fast-check の生成・shrink・seed/path の再現は `just counterexample` に
 
 63 件は数学的整数と Boolean を使った、選択した scalar contract の検証単位です。合法な整数入力で容量を `Number.MAX_SAFE_INTEGER` 以下に限定しています。TypeScript の `number` 型だけでは整数性を保証しないため、API の容量・確定件数の実行時チェックと、状態を操作関数経由で更新する契約を保っています。
 
-オブジェクトの組み立て・呼び出し側の事前条件遵守・任意の getter / Proxy・IEEE 754 全般・Uint8Array のコピーや FIFO の内容は、この `verified` の主張に含めません。構造化カーソルの更新は既存の [LemmaScript の証明](lemmascript.md)、コピーや FIFO は参照モデルの PBT と限定全探索で検査します。
+オブジェクトの組み立て・呼び出し側の事前条件遵守・任意の getter / Proxy・IEEE 754 全般・Uint8Array のコピーや FIFO の内容は、この `verified` の主張に含めません。構造化カーソルの更新とコピー・FIFO の内容は、単体テスト・参照モデルの PBT・限定全探索で検査します。
 
 副作用検査の `assumed` は、Number と TypedArray の組み込み呼び出しの意味を Uneffect の契約カタログに依存することを表します。`Mutate<typeof state.buffer>`、位置・full の更新、`Throw<RangeError>` などの宣言上限を検査した結果であり、組み込み実装やヒープの一般的な正しさを証明した結果ではありません。[公式の保証範囲](https://github.com/mizchi/uneffect/blob/main/docs/assurance-boundaries.md)

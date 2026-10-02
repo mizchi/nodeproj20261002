@@ -8,12 +8,10 @@ mizchi の[「cargo-mutants でテストの穴を測って、proptest と kani �
 | ランダムな操作列を独立した参照モデルと比較する | fast-check + JavaScript の配列         |
 | 反例を得て再現・回帰テスト化する               | fast-check の shrinking と seed / path |
 | 小さな入力空間をすべて検査する                 | 4,665 ケースの具体的な全探索           |
-| 状態遷移の契約を任意の合法入力について証明する | LemmaScript + Dafny                    |
 | スカラー契約と副作用の上限を検査する           | Uneffect + Z3                          |
 
 全探索は以下で定義した入力範囲に対する検査です。Kani の記号実行や形式証明を実装したものではありません。
-形式証明は別に [LemmaScript の実験](lemmascript.md)で行います。
-さらに [Uneffect の実験](uneffect.md)でスカラー契約を `verified`、副作用の上限を `declared` のプロファイルで検査します。
+[Uneffect の実験](uneffect.md)でスカラー契約を `verified`、副作用の上限を `declared` のプロファイルで検査します。
 
 ## 再現する
 
@@ -21,7 +19,6 @@ Node.js 24 以上、pnpm 10.28.2、just を使います。
 
 ```sh
 just install
-just setup-proof
 just experiment
 ```
 
@@ -34,9 +31,10 @@ just mutate-ring-positive # 通常テスト + 長さ 0 を除く PBT
 just mutate-ring-property # 通常テスト + 長さ 0 を含む PBT
 just counterexample       # 既知の mutant に反例を生成・縮小・再現
 just test-exhaustive      # 限定した入力範囲の全探索
-just formal               # 合法な状態の契約を証明し、既知の変異を拒否
 just formal-uneffect      # スカラー契約・副作用を検査し、反例を得て実行時にも再現
 ```
+
+日常の変更には `just mutate-changed` で変更行だけを検査できます。ブランチ比較や範囲を広げる条件は[差分ミューテーションテスト](mutation-diff.md)を参照してください。
 
 ## 題材と契約
 

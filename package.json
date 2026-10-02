@@ -20,11 +20,8 @@
     "fmt": "vp fmt",
     "test:watch": "vp test watch",
     "test:mutation": "stryker run",
+    "test:mutation:changed": "node scripts/mutation-changed.ts",
     "demo:counterexample": "node examples/ring-counterexample.ts",
-    "proof:setup": "node scripts/setup-dafny.ts",
-    "proof": "node scripts/proof.ts check",
-    "proof:regen": "node scripts/proof.ts regen src/ring-cursor.ts",
-    "demo:proof-failure": "node examples/ring-proof-failure.ts",
     "check:uneffect": "node scripts/uneffect.ts",
     "demo:uneffect-failure": "node examples/ring-uneffect-failure.ts"
   },
@@ -34,7 +31,6 @@
     "@stryker-mutator/vitest-runner": "10.0.0",
     "@types/node": "^24.0.0",
     "fast-check": "4.10.2",
-    "lemmascript": "0.6.4",
     "typescript": "6.0.3",
     "vite-plus": "catalog:",
     "vitest": "5.0.1"

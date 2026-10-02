@@ -29,6 +29,10 @@ build:
 mutate *args:
     pnpm test:mutation {{ args }}
 
+# Git の差分を変異させる（--base <ref>、--diff-only、--list）
+mutate-changed *args:
+    pnpm test:mutation:changed {{ args }}
+
 # 境界値テストを除いて生き残る変異を観察
 mutate-demo:
     pnpm test:mutation stryker.demo.config.mjs
@@ -61,26 +65,7 @@ counterexample:
     pnpm demo:counterexample
 
 # 記事と同じ検証の流れを再現
-experiment: check mutate-ring counterexample test-exhaustive formal-uneffect formal
-
-# プロジェクト内に Dafny 4.11.0 を準備
-setup-proof:
-    pnpm proof:setup
-
-# 実装と共有する純粋な状態遷移を証明
-prove:
-    pnpm proof
-
-# コード変更を証明ファイルに反映して再検証
-prove-regen:
-    pnpm proof:regen
-
-# 既知の read/write バグが証明に失敗することを確認
-proof-failure:
-    pnpm demo:proof-failure
-
-# 正しい実装と既知の変異を両方検証
-formal: prove proof-failure
+experiment: check mutate-ring counterexample test-exhaustive formal-uneffect
 
 # Uneffect で契約と副作用を検査し、JSON に証拠を保存
 check-uneffect:
@@ -94,4 +79,4 @@ counterexample-uneffect:
 formal-uneffect: check-uneffect counterexample-uneffect
 
 # 一通りの検証
-verify: check test build mutate formal-uneffect formal
+verify: check test build mutate formal-uneffect

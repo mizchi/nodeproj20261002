@@ -3,8 +3,6 @@ dist
 reports
 .stryker-tmp
 .tools
-*.dfy.base
-*.dfy.merged
 *.log
 .DS_Store
 
