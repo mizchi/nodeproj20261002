@@ -1,0 +1,46 @@
+{
+  "name": "nodeproj20261002",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vite Plus・StrykerJS・fast-check で参照モデルとミューテーションテストを試す TypeScript サンプル",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "fmt": "vp fmt",
+    "test:watch": "vp test watch",
+    "test:mutation": "stryker run",
+    "demo:counterexample": "node examples/ring-counterexample.ts",
+    "proof:setup": "node scripts/setup-dafny.ts",
+    "proof": "node scripts/proof.ts check",
+    "proof:regen": "node scripts/proof.ts regen src/ring-cursor.ts",
+    "demo:proof-failure": "node examples/ring-proof-failure.ts",
+    "check:uneffect": "node scripts/uneffect.ts",
+    "demo:uneffect-failure": "node examples/ring-uneffect-failure.ts"
+  },
+  "devDependencies": {
+    "@mizchi/uneffect": "0.5.1",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
+    "@types/node": "^24.0.0",
+    "fast-check": "4.10.2",
+    "lemmascript": "0.6.4",
+    "typescript": "6.0.3",
+    "vite-plus": "catalog:",
+    "vitest": "5.0.1"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.28.2"
+}
