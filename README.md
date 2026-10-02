@@ -1,118 +1,120 @@
 # nodeproj20261002
 
-日本語 | [English](README.en.md)
+[日本語](README.md) | English
 
-**StrykerJS のミューテーションテストを試すための TypeScript テンプレートプロジェクトです。** Vite Plus 1.0.0 で初期化し、StrykerJS 10.0.0 と fast-check 4.10.2 でテストの抜けを測り、Uneffect 0.5.1 + Z3 で契約・副作用を検査します。
+**A TypeScript template project for experimenting with StrykerJS mutation testing.** Initialized with Vite Plus 1.0.0, it uses StrykerJS 10.0.0 and fast-check 4.10.2 to find gaps in tests, and Uneffect 0.5.1 + Z3 to check contracts and effects.
 
-[cargo-mutants / proptest / Kani の記事](https://zenn.dev/mizchi/articles/rust-mutants-proptest-kani)と同じリングバッファの題材を追加しました。
+The ring buffer example follows the approach in [cargo-mutants / proptest / Kani](https://zenn.dev/mizchi/articles/rust-mutants-proptest-kani), a Japanese article.
 
-## テンプレートとして使う
+## Use this template
 
-GitHub の [Use this template](https://github.com/mizchi/nodeproj20261002/generate) から新しいリポジトリを作成できます。作成後、`package.json` の `name` と README のプロジェクト名を変更して利用してください。
+Create a repository with GitHub's [Use this template](https://github.com/mizchi/nodeproj20261002/generate) button. Then update the `name` in `package.json` and the project name in both READMEs.
 
-## 解説
+## Guides
 
-- [Stryker と fast-check の実験](docs/fast-check-stryker.md): 参照モデル、生成範囲、生き残る変異、反例の shrink・再現、限定全探索の手順と結果。
-- [Git の差分だけを検査する](docs/mutation-diff.md): 変更行の選択、ブランチ比較、検査範囲を広げる条件、差分用レポート。
-- [Uneffect による契約と副作用の検査](docs/uneffect.md): 検査対象、Z3 の反例、`verified` / `assumed` の違いと保証範囲。
+The detailed guides are in Japanese:
 
-## 検証レポート
+- [Stryker and fast-check experiments](docs/fast-check-stryker.md): the reference model, generated inputs, surviving mutants, shrinking and replaying counterexamples, and exhaustive checks over a limited input space.
+- [Mutation testing for Git diffs](docs/mutation-diff.md): selecting changed lines, comparing branches, when to expand the scope, and reports for diff runs.
+- [Contract and effect checks with Uneffect](docs/uneffect.md): checked functions, Z3 counterexamples, the distinction between `verified` and `assumed`, and assurance boundaries.
 
-`reports/` のファイルは各コマンドで生成されます。実行後にローカルで開いてください。
+## Reports
 
-| 確認したい結果                         | レポート                                                                                                                                                                           | 生成するコマンド       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| 全テストで検出した変異                 | [ミューテーション一覧](reports/mutation/mutation.html)                                                                                                                             | `just mutate`          |
-| Git の差分で検出した変異               | [差分の結果](reports/mutation/changed.html)、[対象と判断理由](reports/mutation/changed-plan.json)                                                                                  | `just mutate-changed`  |
-| 境界値テストを省いたときに生き残る変異 | [送料のデモ](reports/mutation/demo.html)                                                                                                                                           | `just mutate-demo`     |
-| 通常テストと PBT の比較                | [通常テスト](reports/mutation/ring-unit.html)、[長さ 0 なしの PBT](reports/mutation/ring-positive.html)、[長さ 0 を含む PBT](reports/mutation/ring-property.html)                  | `just mutate-ring`     |
-| Uneffect の契約・副作用・反例          | [契約](reports/uneffect/contracts.json)、[副作用](reports/uneffect/effects.json)、[read の反例](reports/uneffect/read-zero.json)、[write の反例](reports/uneffect/write-zero.json) | `just formal-uneffect` |
+The commands below generate files in `reports/`. Open them locally after running the command.
 
-Stryker の HTML レポートでは、変異ごとの変更された式と、どのテストが検出したかを確認できます。同じ名前の JSON レポートも生成します。レポートと Stryker の作業ディレクトリは Git の管理対象から除外しています。
+| Result                                           | Report                                                                                                                                                                                                   | Command                |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Mutants detected by the full test suite          | [Mutation results](reports/mutation/mutation.html)                                                                                                                                                       | `just mutate`          |
+| Mutants detected in Git diffs                    | [Diff results](reports/mutation/changed.html), [selection and reasons](reports/mutation/changed-plan.json)                                                                                               | `just mutate-changed`  |
+| Mutants that survive without boundary tests      | [Shipping fee demo](reports/mutation/demo.html)                                                                                                                                                          | `just mutate-demo`     |
+| Unit tests compared with PBT                     | [Unit tests](reports/mutation/ring-unit.html), [PBT excluding zero lengths](reports/mutation/ring-positive.html), [PBT including zero lengths](reports/mutation/ring-property.html)                      | `just mutate-ring`     |
+| Uneffect contracts, effects, and counterexamples | [Contracts](reports/uneffect/contracts.json), [effects](reports/uneffect/effects.json), [read counterexample](reports/uneffect/read-zero.json), [write counterexample](reports/uneffect/write-zero.json) | `just formal-uneffect` |
 
-## 実験を再現する
+Stryker's HTML reports show each mutated expression and the tests that detected it. JSON reports with the same filenames are also generated. Reports and Stryker's working directory are excluded from Git.
+
+## Reproduce the experiments
 
 ```sh
 just install
-just formal-uneffect # 契約・副作用の検査と既知のバグの反例・実行時再現
-just experiment  # ミューテーション比較・shrink・限定全探索・契約検査
+just formal-uneffect # Check contracts and effects; obtain and reproduce known counterexamples
+just experiment     # Compare mutation scores, shrink counterexamples, and check contracts
 ```
 
-通常テストだけで **64/97**、長さ 0 を除いた PBT で **93/97**、長さ 0 を含む PBT で **97/97** の変異を検出しました。[実験の手順と結果](docs/fast-check-stryker.md)に生成範囲、反例、各レポートを記載しています。
+Unit tests detected **64/97** ring buffer mutants. PBT excluding zero lengths detected **93/97**, and PBT including zero lengths detected **97/97**. See the [experiment guide](docs/fast-check-stryker.md) for input ranges, counterexamples, exhaustive checks, and reports.
 
 ```sh
-just check-uneffect          # verified で契約を検査、declared で副作用を検査
-just counterexample-uneffect # read/write の 0 件ガードを外した反例を得て再現
+just check-uneffect          # Contracts with verified assurance; effects with declared assurance
+just counterexample-uneffect # Remove the read/write zero-count guards and reproduce the bugs
 ```
 
-契約は **63 obligations が verified、仮定 0 件**。副作用の検査は **assumed、組み込み契約の仮定 11 件**です。JSON の検証結果を `reports/uneffect/` に保存します。[検査対象・プロファイル・保証範囲](docs/uneffect.md)を参照してください。
+The contract checks produced **63 verified obligations with zero assumptions**. The effect checks are **assumed, with 11 built-in contract assumptions**. JSON results are saved to `reports/uneffect/`. See the [checked functions, assurance profiles, and boundaries](docs/uneffect.md).
 
-## 開発
+## Development
 
-Node.js 24 以上、pnpm 10.28.2、just を使用します。
+Use Node.js 24 or later, pnpm 10.28.2, and just.
 
 ```sh
-just install  # lockfile に従って依存をインストール
-just test     # Vitest で単体テスト
-just check    # フォーマット・lint・型チェック
-just build    # vp pack でライブラリと型宣言をビルド
-just verify   # check・test・build・ミューテーションテスト・契約と副作用の検査
+just install # Install dependencies from the lockfile
+just test    # Run unit tests with Vitest
+just check   # Check formatting, lint, and types
+just build   # Build the library and declarations with vp pack
+just verify  # Check, test, build, run mutation tests, and check contracts and effects
 ```
 
-`just watch` でテストを監視、`just fmt` でフォーマットを適用します。just がなくても `pnpm test`、`pnpm check`、`pnpm build` で実行できます。
+Use `just watch` to watch tests and `just fmt` to format files. Without just, you can run `pnpm test`, `pnpm check`, and `pnpm build`.
 
-変更したソースだけを素早く検査する場合は次を使います。テスト・設定・依存の変更がある場合は全ソースを検査します。[対象の選び方と保証範囲](docs/mutation-diff.md)を参照してください。
+For faster feedback on changed source, use the commands below. By default, changes to tests, configuration, or dependencies expand the scope to all source files. See [selection rules and scope](docs/mutation-diff.md).
 
 ```sh
-just mutate-changed                   # HEAD に対する未コミット差分
-just mutate-changed --base origin/main # ブランチの分岐点からの差分
-just mutate-changed --list             # 対象の表示のみ
+just mutate-changed                   # Uncommitted changes relative to HEAD
+just mutate-changed --base origin/main # Changes since the branch's merge-base
+just mutate-changed --list             # Print the selection without running Stryker
 ```
 
-GitHub Actions の [Mutation diff](.github/workflows/mutation-diff.yml) は PR のソース差分を `--diff-only` で検査します。ソース差分がなければスキップし、対象一覧と HTML / JSON レポートを artifact に保存します。CI ではテスト・設定・依存の変更から全ソース検査へ広げません。[CI の動作と手動実行](docs/mutation-diff.md#github-actions)を参照してください。
+The [Mutation diff](.github/workflows/mutation-diff.yml) GitHub Actions workflow checks source changes in pull requests with `--diff-only`. It skips mutation testing when there are no source changes and uploads the selection and HTML / JSON reports as an artifact. In CI, changes to tests, configuration, or dependencies do not expand the scope to all source files. See [CI behavior and manual runs](docs/mutation-diff.md#github-actions).
 
-## ミューテーションテストを試す
+## Try mutation testing
 
-`src/index.ts` の `calculateShippingFee(subtotal, express?)` は、小計 5,000 円以上で通常送料が無料になり、それ未満は 500 円。速達を指定すると別途 300 円を加算します。小計には非負の整数を円単位で渡す想定です。
+`calculateShippingFee(subtotal, express?)` in `src/index.ts` charges 500 yen for regular shipping when the subtotal is below 5,000 yen, and zero otherwise. Express shipping adds 300 yen. The subtotal is expected to be a nonnegative integer in yen.
 
-まず、境界値のテストを除いた状態で実行します。
+Start by running the tests without the boundary cases:
 
 ```sh
 just mutate-demo
-# pnpm test:mutation stryker.demo.config.mjs でも実行可能
+# Or: pnpm test:mutation stryker.demo.config.mjs
 ```
 
-通常の 4 テストは成功しますが、Stryker が `subtotal >= 5_000` を `subtotal > 5_000` に変えても成功してしまいます。この変異は `Survived` となり、7 個の変異中 6 個を検出してスコアは **85.71%** になります。
+The four regular tests pass even when Stryker changes `subtotal >= 5_000` to `subtotal > 5_000`. This mutant is marked `Survived`. Six of the seven mutants are detected, giving a score of **85.71%**.
 
-次に、5,000 円ちょうどの境界値を含む全テストで実行します。現在はリングバッファも同時に検証します。
+Next, include the tests for exactly 5,000 yen. This command also checks the ring buffer:
 
 ```sh
 just mutate
-# pnpm test:mutation でも実行可能
+# Or: pnpm test:mutation
 ```
 
-`tests/shipping.boundary.test.ts` がこの変異を検出し、送料の 7 個すべてが `Killed` になります。リングバッファの 97 個と合わせたスコアは **100%** です。
+`tests/shipping.boundary.test.ts` detects the surviving mutant, and all seven shipping fee mutants are `Killed`. Together with the 97 ring buffer mutants, the score is **100%**.
 
-## 構成と互換性
+## Configuration and compatibility
 
-- `vite.config.ts`: ビルド・単体テスト・lint・フォーマットの設定。
-- `stryker.config.json`: `src/**/*.ts` を変異させ、`@stryker-mutator/vitest-runner` で検証。変異ごとに、それをカバーするテストを実行します。
-- `stryker.demo.config.mjs`: 送料の通常ケースだけを実行する比較用設定。標準設定を読み込み、変異対象・テスト対象・レポートの出力先を変更します。
-- `stryker.ring.config.mjs`: リングバッファだけを変異させ、通常テスト・長さ 0 なしの PBT・長さ 0 を含む PBT を比較します。
-- `verification/ring-contracts.ts`: 実装と同じスカラー関数を呼び、read/write の長さの増減と 0 件操作の保持を Uneffect で検査します。
+- `vite.config.ts`: build, unit test, lint, and formatting settings.
+- `stryker.config.json`: mutates `src/**/*.ts` and runs tests with `@stryker-mutator/vitest-runner`. Each mutant is checked by the tests that cover it.
+- `stryker.demo.config.mjs`: compares the regular shipping cases. It extends the base configuration and changes the mutation targets, test files, and report paths.
+- `stryker.ring.config.mjs`: compares ring buffer unit tests, PBT excluding zero lengths, and PBT including zero lengths.
+- `verification/ring-contracts.ts`: calls the same scalar functions as the implementation to check read/write length changes and zero-count preservation with Uneffect.
 
-TypeScript は **6.0.3 に固定**しています。雛形の TypeScript 7.0.2 では、Stryker が使う `parseConfigFileTextToJson` API がなく、実行が失敗しました。型宣言も `tsc` で生成します。
+TypeScript is pinned to **6.0.3**. With the scaffold's TypeScript 7.0.2, Stryker failed because the `parseConfigFileTextToJson` API was unavailable. Declarations are generated with `tsc`.
 
-Uneffect は数値契約を扱う `--typescript-program` 経路を使い、同梱コンパイラとプロジェクトの TypeScript が **6.0.3 / exact** で一致することを JSON で確認します。`pnpm-workspace.yaml` に、この経路で使う Uneffect 0.5.1 の TypeScript peer の例外を登録しています。
+Uneffect uses the `--typescript-program` path for numeric contracts. The JSON report confirms that its bundled compiler and the project's TypeScript both use **6.0.3**, with **exact** compiler parity. `pnpm-workspace.yaml` contains a TypeScript peer dependency exception for Uneffect 0.5.1 on this path.
 
-Vitest は Vite Plus と同じ **5.0.1**、`@stryker-mutator/vitest-runner` は **10.0.0** に固定しています。
+Vitest is pinned to **5.0.1**, matching Vite Plus, and `@stryker-mutator/vitest-runner` is pinned to **10.0.0**.
 
-Vitest 5 では `testNamePattern` に使うテストのフルネームが空白区切りから `>` 区切りに変わりました。runner 10.0.0 は空白区切りの名前を渡すため、`describe` 配下のテストが変異検証時に選択されず、全変異が `Survived` になっていました。
+Vitest 5 changed the separator in full test names used by `testNamePattern` from spaces to `>`. Runner 10.0.0 supplies names separated by spaces, so tests inside `describe` blocks were not selected during mutation testing, leaving every mutant `Survived`.
 
-`patches/@stryker-mutator__vitest-runner@10.0.0.patch` で、runner とカバレッジ収集側の名前の組み立てを `>` 区切りに揃えています。`pnpm-workspace.yaml` の `patchedDependencies` に登録しており、`just install` 時にも適用されます。このパッチは Vitest 5 用です。runner を更新するときはパッチの要否を確認し、`just mutate-demo` が 85.71%、`just mutate` が 100% になることを検証してください。
+`patches/@stryker-mutator__vitest-runner@10.0.0.patch` changes name construction in the runner and coverage collector to use `>`. It is registered in `pnpm-workspace.yaml` under `patchedDependencies` and applied by `just install`. This patch is for Vitest 5. When updating the runner, check whether the patch is still needed and verify that `just mutate-demo` scores 85.71% and `just mutate` scores 100%.
 
-公式ドキュメント: [Vite Plus のプロジェクト作成](https://viteplus.dev/guide/create)、[StrykerJS](https://github.com/stryker-mutator/stryker-js)、[Vitest runner](https://stryker-mutator.io/docs/stryker-js/vitest-runner/)、[Vitest 5 のテスト名変更](https://vitest.dev/guide/migration/#testnamepattern-matches-the-joined-full-name)。
+Official documentation: [creating a Vite Plus project](https://viteplus.dev/guide/create), [StrykerJS](https://github.com/stryker-mutator/stryker-js), [Vitest runner](https://stryker-mutator.io/docs/stryker-js/vitest-runner/), and [Vitest 5 test name changes](https://vitest.dev/guide/migration/#testnamepattern-matches-the-joined-full-name).
 
-## ライセンス
+## License
 
-[MIT](LICENSE)。Copyright (c) 2026 mizchi.
+[MIT](LICENSE). Copyright (c) 2026 mizchi.
